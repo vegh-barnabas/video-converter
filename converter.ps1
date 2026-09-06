@@ -85,3 +85,5 @@ $files | ForEach-Object {
         Write-Host "ERROR! Converting has failed." -BackgroundColor Red -ForegroundColor White
     }
 }
+
+Show-SpaceSaved -Files $files -OutputDirectory $output
