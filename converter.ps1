@@ -3,6 +3,8 @@
 # You need to either create the source folder manually or run the program once.
 # Requires ffmpeg to be installed: https://ffmpeg.org/
 
+. "./helpers.ps1"
+
 $source = ".\source"
 $output = ".\converted"
 

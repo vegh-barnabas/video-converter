@@ -20,15 +20,17 @@ function Show-SpaceSaved {
     $savedBytes = $originalSize - $convertedSize
 
     Write-Host ""
-    Write-Host "========================================" -BackgroundColor Green -ForegroundColor Black
-    Write-Host "CONVERSION FINISHED" -BackgroundColor Green -ForegroundColor Black
-    Write-Host "Original size:  $([math]::Round($originalSize / 1GB, 2)) GB" -BackgroundColor Green -ForegroundColor Black
-    Write-Host "Converted size: $([math]::Round($convertedSize / 1GB, 2)) GB" -BackgroundColor Green -ForegroundColor Black
+    Write-Host "========================================" -ForegroundColor DarkGreen
+    Write-Host "CONVERSION FINISHED" -ForegroundColor DarkGreen
+    Write-Host "Original size:  $([math]::Round($originalSize / 1GB, 2)) GB" -ForegroundColor Green
+    Write-Host "Converted size: $([math]::Round($convertedSize / 1GB, 2)) GB" -ForegroundColor Green
 
     if ($savedBytes -ge 0) {
-        Write-Host "Space saved:    $([math]::Round($savedBytes / 1GB, 2)) GB" -BackgroundColor Green -ForegroundColor Black
+        Write-Host "Space saved:    $([math]::Round($savedBytes / 1GB, 2)) GB" -ForegroundColor Green
     }
     else {
-        Write-Host "Space increased: $([math]::Round([math]::Abs($savedBytes) / 1GB, 2)) GB" -BackgroundColor Red -ForegroundColor White
+        Write-Host "Space increased: $([math]::Round([math]::Abs($savedBytes) / 1GB, 2)) GB" -ForegroundColor Red
     }
+
+    Write-Host "========================================" -ForegroundColor DarkGreen
 }
