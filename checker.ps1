@@ -22,10 +22,10 @@ Get-ChildItem $folder -File -Recurse | ForEach-Object {
     if ($videoCodec -ne "hevc" -or $audioCodec -ne "aac") {
         $sizeMB = [math]::Round($_.Length / 1MB, 2)
 
-        Write-Host "$($_.FullName)" -BackgroundColor Yellow  -ForegroundColor Black
-        Write-Host "  Size: ${sizeMB} MB" -BackgroundColor Yellow  -ForegroundColor Black
-        Write-Host "  Video: $videoCodec" -BackgroundColor Yellow  -ForegroundColor Black
-        Write-Host "  Audio: $audioCodec" -BackgroundColor Yellow  -ForegroundColor Black
+        Write-Host "$($_.FullName)" -BackgroundColor Yellow -ForegroundColor Black
+        Write-Host "  Size: ${sizeMB} MB" -BackgroundColor Yellow -ForegroundColor Black
+        Write-Host "  Video: $videoCodec" -BackgroundColor Yellow -ForegroundColor Black
+        Write-Host "  Audio: $audioCodec" -BackgroundColor Yellow -ForegroundColor Black
         Write-Host ""
     }
 }
