@@ -25,12 +25,12 @@ Get-ChildItem $source -File | Where-Object {
     $audioCount = $audioStreams.Count
 
     Write-Host ""
-    Write-Host "========================================" -BackgroundColor Yellow
-    Write-Host "File: $($_.Name)" -BackgroundColor Yellow
-    Write-Host "Audio stream count: $audioCount" -BackgroundColor Yellow
+    Write-Host "========================================" -BackgroundColor Yellow -ForegroundColor Black
+    Write-Host "File: $($_.Name)" -BackgroundColor Yellow  -ForegroundColor Black
+    Write-Host "Audio stream count: $audioCount" -BackgroundColor Yellow  -ForegroundColor Black
 
     if ($audioCount -eq 0) {
-        Write-Host "No audio streams, skipping!" -BackgroundColor Red
+        Write-Host "No audio streams, skipping!" -BackgroundColor Red  -ForegroundColor White
         return
     }
 
@@ -47,8 +47,8 @@ Get-ChildItem $source -File | Where-Object {
         $audioFilter = "${inputs}amix=inputs=${audioCount}:duration=longest[a]"
     }
 
-    Write-Host "Filter: $audioFilter" -BackgroundColor Yellow
-    Write-Host "Converting..." -BackgroundColor Yellow
+    Write-Host "Filter: $audioFilter" -BackgroundColor Yellow  -ForegroundColor Black
+    Write-Host "Converting..." -BackgroundColor Yellow  -ForegroundColor Black
 
     ffmpeg -i "$input" `
         -map 0:v:0 `
@@ -65,6 +65,6 @@ Get-ChildItem $source -File | Where-Object {
         Write-Host "Done!" -BackgroundColor Yellow
     }
     else {
-        Write-Host "ERROR! Converting has failed." -BackgroundColor Red
+        Write-Host "ERROR! Converting has failed." -BackgroundColor Red  -ForegroundColor White
     }
 }
