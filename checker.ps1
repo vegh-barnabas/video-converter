@@ -1,9 +1,23 @@
-# This program checks if the files in a folder has been converted with the converter.
+# This program checks if the video files in a folder have been converted with the converter.
 # Requires ffmpeg to be installed: https://ffmpeg.org/
 
 $folder = ".\source"
 
-Get-ChildItem $folder -File -Recurse | ForEach-Object {
+$videoExtensions = @(
+    ".mp4",
+    ".mkv",
+    ".avi",
+    ".mov",
+    ".webm"
+)
+
+$files = Get-ChildItem $folder -File -Recurse | Where-Object {
+    $_.Extension.ToLower() -in $videoExtensions
+}
+
+$currentDirectory = ""
+
+$files | ForEach-Object {
 
     $file = $_.FullName
 
@@ -20,12 +34,22 @@ Get-ChildItem $folder -File -Recurse | ForEach-Object {
         "$file"
 
     if ($videoCodec -ne "hevc" -or $audioCodec -ne "aac") {
-        $sizeMB = [math]::Round($_.Length / 1MB, 2)
 
-        Write-Host "$($_.FullName)" -BackgroundColor Yellow -ForegroundColor Black
-        Write-Host "  Size: ${sizeMB} MB" -BackgroundColor Yellow -ForegroundColor Black
-        Write-Host "  Video: $videoCodec" -BackgroundColor Yellow -ForegroundColor Black
-        Write-Host "  Audio: $audioCodec" -BackgroundColor Yellow -ForegroundColor Black
-        Write-Host ""
+        # Print directory name only when it changes
+        if ($_.DirectoryName -ne $currentDirectory) {
+            $currentDirectory = $_.DirectoryName
+
+            Write-Host ""
+            Write-Host "========================================" `
+                -BackgroundColor Cyan `
+                -ForegroundColor Black
+
+            Write-Host "$currentDirectory" `
+                -BackgroundColor Cyan `
+                -ForegroundColor Black
+        }
+
+        # Print only filename
+        Write-Host "  $($_.Name)" -ForegroundColor Yellow
     }
 }
