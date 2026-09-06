@@ -11,7 +11,7 @@ $output = ".\converted"
 New-Item -ItemType Directory -Force -Path $source | Out-Null
 New-Item -ItemType Directory -Force -Path $output | Out-Null
 
-$files = @(Get-ChildItem $source -File | Where-Object {
+$files = @(Get-ChildItem $source -File -Recurse | Where-Object {
     $_.Extension -in ".mp4", ".mkv", ".avi", ".mov", ".webm"
 })
 
@@ -23,7 +23,14 @@ $files | ForEach-Object {
     $currentFile++
 
     $input = $_.FullName
-    $outputFile = Join-Path $output ($_.BaseName + "-converted.mp4")
+
+    $relativePath = $_.FullName.Substring($source.Length)
+    $relativeDirectory = Split-Path $relativePath -Parent
+
+    $outputDirectory = Join-Path $output $relativeDirectory
+    New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
+
+    $outputFile = Join-Path $outputDirectory ($_.BaseName + "-converted.mp4")
 
     # Video duration in seconds
     $duration = ffprobe -v error `
