@@ -1,3 +1,39 @@
+function Write-Info {
+    param (
+        [string]$Message
+    )
+
+    Write-Host "[INFO]" -ForegroundColor Cyan -NoNewline
+    Write-Host " $Message"
+}
+
+function Write-Error {
+    param (
+        [string]$Message
+    )
+
+    Write-Host "[ERROR]" -ForegroundColor Red -NoNewline
+    Write-Host " $Message"
+}
+
+function Write-Success {
+    param (
+        [string]$Message
+    )
+
+    Write-Host "[SUCCESS]" -ForegroundColor Green -NoNewline
+    Write-Host " $Message"
+}
+
+function Write-Warning {
+    param (
+        [string]$Message
+    )
+
+    Write-Host "[WARNING]" -ForegroundColor DarkYellow -NoNewline
+    Write-Host " $Message"
+}
+
 function Show-SpaceSaved {
     param (
         [array]$Files,
@@ -19,18 +55,35 @@ function Show-SpaceSaved {
 
     $savedBytes = $originalSize - $convertedSize
 
-    Write-Host ""
-    Write-Host "========================================" -ForegroundColor DarkGreen
-    Write-Host "CONVERSION FINISHED" -ForegroundColor DarkGreen
-    Write-Host "Original size:  $([math]::Round($originalSize / 1GB, 2)) GB" -ForegroundColor Green
-    Write-Host "Converted size: $([math]::Round($convertedSize / 1GB, 2)) GB" -ForegroundColor Green
-
+    Write-Success "Original size:  $([math]::Round($originalSize / 1GB, 2)) GB"
+    Write-Success "Converted size: $([math]::Round($convertedSize / 1GB, 2)) GB"
+    
     if ($savedBytes -ge 0) {
-        Write-Host "Space saved:    $([math]::Round($savedBytes / 1GB, 2)) GB" -ForegroundColor Green
+        Write-Success "Space saved:    $([math]::Round($savedBytes / 1GB, 2)) GB"
     }
     else {
-        Write-Host "Space increased: $([math]::Round([math]::Abs($savedBytes) / 1GB, 2)) GB" -ForegroundColor Red
+        Write-Warning "Space increased: $([math]::Round([math]::Abs($savedBytes) / 1GB, 2)) GB"
+    }
+}
+
+function Format-Duration {
+    param (
+        [int]$hours,
+        [int]$minutes,
+        [int]$seconds
+    )
+
+    $parts = @()
+
+    if ($hours -gt 0) {
+        $parts += "$hours hours"
     }
 
-    Write-Host "========================================" -ForegroundColor DarkGreen
+    if ($minutes -gt 0) {
+        $parts += "$minutes minutes"
+    }
+
+    $parts += "$seconds seconds"
+
+    return $parts -join " "
 }

@@ -12,8 +12,8 @@ New-Item -ItemType Directory -Force -Path $source | Out-Null
 New-Item -ItemType Directory -Force -Path $output | Out-Null
 
 $files = @(Get-ChildItem $source -File -Recurse | Where-Object {
-    $_.Extension -in ".mp4", ".mkv", ".avi", ".mov", ".webm"
-})
+        $_.Extension -in ".mp4", ".mkv", ".avi", ".mov", ".webm"
+    })
 
 $totalFiles = $files.Count
 $currentFile = 0
@@ -22,41 +22,39 @@ $files | ForEach-Object {
 
     $currentFile++
 
-    $input = $_.FullName
+    $fileInput = $_.FullName
 
-    $relativePath = $_.FullName.Substring($source.Length)
-    $relativeDirectory = Split-Path $relativePath -Parent
-
-    $outputDirectory = Join-Path $output $relativeDirectory
-    New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
-
-    $outputFile = Join-Path $outputDirectory ($_.BaseName + "-converted.mp4")
+    $outputFile = Join-Path $output ($_.BaseName + "-converted.mp4")
 
     # Video duration in seconds
     $duration = ffprobe -v error `
         -show_entries format=duration `
         -of default=noprint_wrappers=1:nokey=1 `
-        "$input"
+        "$fileInput"
 
     $durationTime = [TimeSpan]::FromSeconds([double]$duration)
 
     $audioStreams = @(ffprobe -v error `
-        -select_streams a `
-        -show_entries stream=index `
-        -of csv=p=0 `
-        "$input")
+            -select_streams a `
+            -show_entries stream=index `
+            -of csv=p=0 `
+            "$fileInput")
 
     $audioCount = $audioStreams.Count
 
-    Write-Host ""
-    Write-Host "========================================" -BackgroundColor Yellow -ForegroundColor Black
-    Write-Host "File: $($_.Name)" -BackgroundColor Yellow -ForegroundColor Black
-    Write-Host "Item: $currentFile / $totalFiles" -BackgroundColor Yellow -ForegroundColor Black
-    Write-Host "Duration: $($durationTime.ToString('hh\:mm\:ss'))" -BackgroundColor Yellow -ForegroundColor Black
-    Write-Host "Audio stream count: $audioCount" -BackgroundColor Yellow -ForegroundColor Black
+    $durationString = Format-Duration `
+        -hours $durationTime.Hours `
+        -minutes $durationTime.Minutes `
+        -seconds $durationTime.Seconds
+
+    Write-Info "File: $($_.Name)"
+    Write-Info "Item: $currentFile / $totalFiles"
+    Write-Info "Duration: $durationString"
+    Write-Info "Audio stream count: $audioCount"
 
     if ($audioCount -eq 0) {
-        Write-Host "No audio streams, skipping!" -BackgroundColor Red -ForegroundColor White
+        Write-Error "No audio streams, skipping!"
+
         return
     }
 
@@ -73,10 +71,10 @@ $files | ForEach-Object {
         $audioFilter = "${inputs}amix=inputs=${audioCount}:duration=longest[a]"
     }
 
-    Write-Host "Filter: $audioFilter" -BackgroundColor Yellow -ForegroundColor Black
-    Write-Host "Converting..." -BackgroundColor Yellow -ForegroundColor Black
+    # Write-Info "Filter: $audioFilter"
+    Write-Info "Converting..."
 
-    ffmpeg -i "$input" `
+    ffmpeg -i "$fileInput" `
         -map 0:v:0 `
         -filter_complex "$audioFilter" `
         -map "[a]" `
@@ -88,11 +86,14 @@ $files | ForEach-Object {
         "$outputFile"
 
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "Done!" -BackgroundColor Yellow
+        Write-Success "File conversion successful!"
     }
     else {
-        Write-Host "ERROR! Converting has failed." -BackgroundColor Red -ForegroundColor White
+        Write-Error "Converting has failed"
     }
 }
 
-Show-SpaceSaved -Files $files -OutputDirectory $output
+if ($LASTEXITCODE -eq 0) {
+    Write-Success "All file conversion finished!"
+    Show-SpaceSaved -Files $files -OutputDirectory $output
+}

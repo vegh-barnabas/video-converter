@@ -3,6 +3,8 @@
 #
 # Requires ffmpeg and ffprobe to be installed.
 
+. "./helpers.ps1"
+
 $source = "F:\Videók\"
 $listFile = ".\state\conversion-list.txt"
 
@@ -30,23 +32,7 @@ $videoExtensions = @(
 # [ERROR]: Asd
 # [SUCCESS]: Fgh
 
-# ============================================================
-# STEP 1 - CHECK FILES
-# ============================================================
-
-Write-Host ""
-Write-Host "========================================" `
-  -BackgroundColor Cyan `
-  -ForegroundColor Black
-
-Write-Host "CHECKING FILES" `
-  -BackgroundColor Cyan `
-  -ForegroundColor Black
-
-Write-Host "========================================" `
-  -BackgroundColor Cyan `
-  -ForegroundColor Black
-
+Write-Info "Checking files..."
 
 $files = @(Get-ChildItem $source -File -Recurse | Where-Object {
 
@@ -82,9 +68,7 @@ foreach ($file in $files) {
 
   if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($videoCodec)) {
 
-    Write-Host ""
-    Write-Host "INVALID VIDEO:" -ForegroundColor Red
-    Write-Host $file.FullName -ForegroundColor Red
+    Write-Error "Invalid video! $($file.FullName)"
 
     $invalidFiles += $file.FullName
 
@@ -100,9 +84,7 @@ foreach ($file in $files) {
 
   if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($audioCodec)) {
 
-    Write-Host ""
-    Write-Host "INVALID VIDEO / AUDIO:" -ForegroundColor Red
-    Write-Host $file.FullName -ForegroundColor Red
+    Write-Error "Invalid audio! $($file.FullName)"
 
     $invalidFiles += $file.FullName
 
@@ -121,22 +103,8 @@ if ($invalidFiles.Count -gt 0) {
     -Path $invalidListFile `
     -Encoding UTF8
 
-  Write-Host ""
-  Write-Host "========================================" `
-    -BackgroundColor Red `
-    -ForegroundColor White
-
-  Write-Host "INVALID VIDEOS: $($invalidFiles.Count)" `
-    -BackgroundColor Red `
-    -ForegroundColor White
-
-  Write-Host "List saved to: $invalidListFile" `
-    -ForegroundColor Red
-
-  Write-Host "========================================" `
-    -BackgroundColor Red `
-    -ForegroundColor White
-
+  Write-Error "Invalid videos: $($invalidFiles.Count)"
+  Write-Error "List saved to: $invalidListFile"
 }
 else {
 
@@ -156,12 +124,8 @@ if ($filesToConvert.Count -gt 0) {
     -Path $listFile `
     -Encoding UTF8
 
-  Write-Host ""
-  Write-Host "Files requiring conversion: $($filesToConvert.Count)" `
-    -ForegroundColor Yellow
-
-  Write-Host "List saved to: $listFile" `
-    -ForegroundColor Gray
+  Write-Info "Files requiring conversion: $($filesToConvert.Count)"
+  Write-Info "List saved to: $listFile"
 }
 else {
 
@@ -170,9 +134,7 @@ else {
     -Path $listFile `
     -ErrorAction SilentlyContinue
 
-  Write-Host ""
-  Write-Host "All files are already converted." `
-    -ForegroundColor Green
+  Write-Info "All files are already converted. Exiting."
 
   exit
 }
@@ -182,18 +144,7 @@ else {
 # STEP 3 - CONVERT
 # ============================================================
 
-Write-Host ""
-Write-Host "========================================" `
-  -BackgroundColor Yellow `
-  -ForegroundColor Black
-
-Write-Host "STARTING CONVERSION" `
-  -BackgroundColor Yellow `
-  -ForegroundColor Black
-
-Write-Host "========================================" `
-  -BackgroundColor Yellow `
-  -ForegroundColor Black
+Write-Info "Starting conversion..."
 
 
 while ($true) {
@@ -217,36 +168,15 @@ while ($true) {
 
   $input = $lines[-1]
 
-  Write-Host ""
-  Write-Host "========================================" `
-    -BackgroundColor Yellow `
-    -ForegroundColor Black
-
-  Write-Host "Remaining: $($lines.Count)" `
-    -BackgroundColor Yellow `
-    -ForegroundColor Black
-
-  Write-Host "File:" `
-    -BackgroundColor Yellow `
-    -ForegroundColor Black
-
-  Write-Host "$input" `
-    -ForegroundColor Cyan
-
+  Write-Info "Remaining: $($lines.Count)"
+  Write-Info "Current file: $input"
 
   # ========================================================
   # Check that the file still exists
   # ========================================================
 
   if (-not (Test-Path $input)) {
-
-    Write-Host ""
-    Write-Host "ERROR: File does not exist!" `
-      -BackgroundColor Red `
-      -ForegroundColor White
-
-    Write-Host "Keeping it in the list." `
-      -ForegroundColor Yellow
+    Write-Error "File does not exist! Keeping it in the list."
 
     break
   }
@@ -289,7 +219,6 @@ while ($true) {
       "$input")
 
   $audioCount = $audioStreams.Count
-
 
   Write-Host ""
   Write-Host "Duration: $($durationTime.ToString('hh\:mm\:ss'))" `
